@@ -49,7 +49,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         ItemViewHolder itemViewHolder = (ItemViewHolder) holder;
 
         itemViewHolder.mProductName.setText(recyclerItemArrayList.get(position).productName);
-        itemViewHolder.mProductVolume.setText(recyclerItemArrayList.get(position).productVolume);
+        itemViewHolder.mProductVolume.setText(String.valueOf(recyclerItemArrayList.get(position).productVolume));
         itemViewHolder.mProductPrice.setText(recyclerItemArrayList.get(position).productPrice);
     }
 
