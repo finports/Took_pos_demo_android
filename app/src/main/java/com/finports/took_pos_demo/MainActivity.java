@@ -201,6 +201,9 @@ public class MainActivity extends AppCompatActivity {
 
         total_price.setText(formatter.format((iProduct1_prict*iProduct1_qty)+(iProduct2_price*iProduct2_qty))+ "원");
 
+    }
+
+    public void changeTookBtn() {
         imageView_took.setImageResource(R.drawable.icon_logo_ok);
     }
 

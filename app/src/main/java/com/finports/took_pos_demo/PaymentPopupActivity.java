@@ -63,6 +63,8 @@ public class PaymentPopupActivity extends Activity {
         textView_name = findViewById(R.id.paymentpopup_textview_name);
         textView_price = findViewById(R.id.paymentpopup_textview_price);
 
+        imageView_took = findViewById(R.id.mainactivity_image_took);
+
         intent = getIntent();
         textView_name.setText(intent.getExtras().getString("customer_name"));
         textView_price.setText(formatter.format(intent.getExtras().getInt("price"))+"원");
@@ -101,14 +103,13 @@ public class PaymentPopupActivity extends Activity {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            ((MainActivity)MainActivity.mContext).changeTookBtn();
             String message = String.valueOf(intent.getStringExtra("complete"));
             Log.d("test", "mess = "+message);
-
             if (message.equals("complete")){
                 finish();
             }
         }
-
     };
 
     public void httpRun(String url) {
@@ -129,6 +130,7 @@ public class PaymentPopupActivity extends Activity {
     void sendFcm(){
         Gson gson = new Gson();
         NotificationModel notificationModel = new NotificationModel();
+        Log.d("test", "fcm = "+intent.getExtras().getString("fcm_code"));
         notificationModel.to = intent.getExtras().getString("fcm_code");
         notificationModel.notification.title =" 테스트 ";
         notificationModel.notification.text = "text 테스트";
