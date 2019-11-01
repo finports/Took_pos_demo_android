@@ -8,9 +8,13 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
@@ -43,12 +47,14 @@ public class PaymentPopupActivity extends Activity {
     JSONObject jsonObject = new JSONObject();
     OkHttpClient client = new OkHttpClient();
 
+    ImageView imageView_took;
+
     String payment_code = "";
     Intent intent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        requestindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         LocalBroadcastManager.getInstance(this).registerReceiver(mMessageReceiver,
                 new IntentFilter("complete"));
         getWindow().setBackgroundDrawableResource(R.color.transparent);
@@ -65,6 +71,7 @@ public class PaymentPopupActivity extends Activity {
             jsonObject.put("payment_code", intent.getExtras().getString("payment_code"));
             jsonObject.put("user_id", "03f885a6f58c49dd98bf6d631dc62d00");
             jsonObject.put("amount", intent.getExtras().getInt("price"));
+
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -72,16 +79,23 @@ public class PaymentPopupActivity extends Activity {
         imageView_ok.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                ((MainActivity)MainActivity.mContext).initializeValue();
                 Log.d("test", "json = "+jsonObject.toString());
                 httpRun("http://15.164.247.222:5000/payment/");
             }
         });
     }
 
+    public boolean onTouchEvent(MotionEvent event) {
+        if(event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            return false;
+        }
+        return true;
+    }
+
     @Override
     public void onResume() {
         super.onResume();
-
     }
 
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
@@ -89,10 +103,12 @@ public class PaymentPopupActivity extends Activity {
         public void onReceive(Context context, Intent intent) {
             String message = String.valueOf(intent.getStringExtra("complete"));
             Log.d("test", "mess = "+message);
+
             if (message.equals("complete")){
                 finish();
             }
         }
+
     };
 
     public void httpRun(String url) {
@@ -100,7 +116,7 @@ public class PaymentPopupActivity extends Activity {
         new Thread(){
             public void run(){
                 try (Response response = client.newCall(request).execute()) {
-                    Log.d("test", response.body().string());
+                    Log.d("test", "TIMING");
 //                    setUi();
                     sendFcm();
                 } catch (IOException e) {
@@ -108,18 +124,17 @@ public class PaymentPopupActivity extends Activity {
                 }
             }
         }.start();
-
     }
 
     void sendFcm(){
         Gson gson = new Gson();
-
         NotificationModel notificationModel = new NotificationModel();
         notificationModel.to = intent.getExtras().getString("fcm_code");
         notificationModel.notification.title =" 테스트 ";
         notificationModel.notification.text = "text 테스트";
         notificationModel.data.price = intent.getExtras().getInt("price");
         notificationModel.data.payment_code = intent.getExtras().getString("payment_code");
+        notificationModel.data.fcm_id = intent.getExtras().getString("fcm_id");
 
         RequestBody requestBody = RequestBody.create(MediaType.parse("application/jsonl charset=utf8"), gson.toJson(notificationModel));
         Request request = new Request.Builder()
