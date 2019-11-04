@@ -160,4 +160,12 @@ public class PaymentPopupActivity extends Activity {
         });
 
     }
+
+    @Override
+    public void onBackPressed() {
+        Intent intent = new Intent(PaymentPopupActivity.this, MainActivity.class);
+        startActivity(intent);
+        ((MainActivity)MainActivity.mContext).changeTookBtn();
+        finish();
+    }
 }
