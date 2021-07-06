@@ -23,8 +23,10 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-        <activity android:name=".PaymentPopupActivity"
-            android:theme="@android:style/Theme.Dialog"></activity>
+        <activity
+            android:name=".PaymentPopupActivity"
+            android:theme="@style/CustomDialogTheme">
+        </activity>
         <activity android:name=".ScannerActivity" />
         <activity android:name=".MainActivity">
             <intent-filter>
@@ -33,9 +35,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-
-
     </application>
 
 </manifest>

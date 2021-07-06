@@ -3,12 +3,15 @@ package com.finports.took_pos_demo;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -30,6 +33,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    public static Context mContext;
+
     ImageView product1_minus;
     ImageView product1_plus;
     TextView product1_qty;
@@ -45,7 +50,7 @@ public class MainActivity extends AppCompatActivity {
     TextView total_price;
     int iProduct2_qty = 1;
     int iProduct2_price = 50454;
-
+    String fcm_id = "";
     ImageView imageView_took;
     DecimalFormat formatter = new DecimalFormat("###,###");
 
@@ -53,6 +58,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        mContext = this;
         product1_qty = findViewById(R.id.mainactivity_product1_qty);
         product2_qty = findViewById(R.id.mainactivity_product2_qty);
         product1_price = findViewById(R.id.mainactivity_textview_product1_price);
@@ -107,11 +114,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-
                 IntentIntegrator intentIntegrator = new IntentIntegrator(MainActivity.this);
                 intentIntegrator.setBeepEnabled(false);//바코드 인식시 소리
                 intentIntegrator.setCaptureActivity(ScannerActivity.class);
                 intentIntegrator.initiateScan();
+
+                imageView_took.setImageResource(R.drawable.to_ok);
 
             }
         });
@@ -122,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(InstanceIdResult instanceIdResult) {
                 String newToken = instanceIdResult.getToken();
+                fcm_id = newToken;
                 Log.d("test", newToken);
             }
         });
@@ -132,14 +141,12 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         iProduct2_qty = 1;
         iProduct1_qty = 1;
-
     }
 
     public void setProduct1(){
         product1_qty.setText(String.valueOf(iProduct1_qty));
         product1_price.setText(formatter.format(iProduct1_prict * iProduct1_qty)+"원");
         setTotalPrice();
-
     }
 
     public void setProduct2(){
@@ -155,9 +162,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+
+        imageView_took.setImageResource(R.drawable.to_ok);
+
         if(result != null) {
             if(result.getContents() == null) {
                 Toast.makeText(this, "Cancelled", Toast.LENGTH_LONG).show();
+                imageView_took.setImageResource(R.drawable.icon_logo_ok);
             } else {
                 try {
                     JSONObject jsonObject = new JSONObject(result.getContents());
@@ -167,7 +178,9 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("price", ((iProduct1_prict*iProduct1_qty)+(iProduct2_price*iProduct2_qty)));
                     intent.putExtra("payment_code", jsonObject.getString("payment_code"));
                     intent.putExtra("fcm_code", jsonObject.getString("fcm_id"));
+                    intent.putExtra("fcm_id", fcm_id);
                     startActivity(intent);
+                    imageView_took.setImageResource(R.drawable.to_ok);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -175,5 +188,23 @@ public class MainActivity extends AppCompatActivity {
         } else {
             super.onActivityResult(requestCode, resultCode, data);
         }
+
     }
+
+    public void initializeValue() {
+
+        product1_qty.setText(String.valueOf(iProduct1_qty));
+        product2_qty.setText(String.valueOf(iProduct2_qty));
+
+        product1_price.setText(String.valueOf(formatter.format(iProduct1_prict*iProduct1_qty)) + "원");
+        product2_price.setText(String.valueOf(formatter.format(iProduct2_price*iProduct2_qty)) + "원");
+
+        total_price.setText(formatter.format((iProduct1_prict*iProduct1_qty)+(iProduct2_price*iProduct2_qty))+ "원");
+
+    }
+
+    public void changeTookBtn() {
+        imageView_took.setImageResource(R.drawable.icon_logo_ok);
+    }
+
 }
